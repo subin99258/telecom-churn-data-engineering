@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Data files you may not want tracked
+data/raw/
+data/processed/
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
