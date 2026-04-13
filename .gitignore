@@ -12,7 +12,7 @@ __pycache__/
 .DS_Store
 
 # Data files you may not want tracked
-data/raw/
+
 data/processed/
 
 # VS Code
