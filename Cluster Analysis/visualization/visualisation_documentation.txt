@@ -1,0 +1,194 @@
+
+STAGE 2 DELIVERABLES
+Clustering Analysis — Visualisation Section
+
+
+Prepared by: Mahekash Kumar
+Role: Clustering Data Analysis — Visualisation
+Project: Customer Churn Prediction
+Team 3
+
+1. Introduction
+This document covers the visualisation part of the clustering analysis for the Stage 2 deliverables of the Customer Churn Prediction project. The main goal of this project is to understand why customers leave the company and to predict which customers are likely to leave in the future.
+Before building a prediction model, we first grouped customers into distinct segments using a technique called K-Means clustering. This was done by Umesh, who trained the clustering model. My responsibility was to take the results of that model and create clear, easy-to-understand visualisations that explain what the clusters look like and what they mean for the business.
+A total of six visualisations were created, each highlighting a different aspect of the customer segments. All visualisations were built using Python with the matplotlib and seaborn libraries. The Python code for each chart is included in this document alongside the diagram.
+
+2. Overview of the Clustering Result
+The K-Means model was trained on a preprocessed and standardised version of the customer dataset. The churn column was intentionally left out during clustering so the model could find natural groupings without being influenced by the outcome we are trying to predict. Churn was only looked at afterwards to see how it relates to the clusters.
+The model produced four clusters, numbered Cluster 0 to Cluster 3. The table below summarises each cluster based on average tenure (how long customers have been with the company), average monthly charges (how much they pay per month), and their average churn rate:
+
+•	Cluster 0 — Average tenure: 32.52 months | Average monthly charges: $67.95 | Churn rate: ~26%
+•	Cluster 1 — Average tenure: 31.29 months | Average monthly charges: $67.93 | Churn rate: ~29% (highest)
+•	Cluster 2 — Average tenure: 31.74 months | Average monthly charges: $42.02 | Churn rate: ~25%
+•	Cluster 3 — Average tenure: 34.15 months | Average monthly charges: $65.46 | Churn rate: ~24% (lowest)
+
+The most noticeable difference between the clusters is the average monthly charges. Cluster 2 stands out clearly as the low-spend group, paying an average of $42.02 per month compared to over $65 for the other three clusters. Cluster 1 has the highest churn rate at 29%, making it the most at-risk group for the business.
+
+3. Visualisations
+3.1  Customer Segmentation using PCA
+What this diagram shows
+This is the main overview chart of all the customer clusters. Because the dataset has many features (such as tenure, monthly charges, contract type, and internet service), it is not possible to display all of them on one chart. Instead, we used a technique called Principal Component Analysis (PCA) to compress all the features down to just two numbers so every customer can be plotted on a flat chart. PCA is used only for visualisation — it is not part of the clustering model itself.
+Each dot on the chart represents one customer. The four colours represent the four clusters: Cluster 0 (blue), Cluster 1 (orange), Cluster 2 (green), and Cluster 3 (red).
+
+ 
+Diagram 1: Customer Segmentation using PCA — each dot is a customer, colours show which cluster they belong to
+What we can see
+The four clusters form recognisable horizontal band-like regions across the chart. Cluster 3 (red) appears mostly in the upper part of the chart. Cluster 0 (blue) sits in the upper-middle area. Cluster 1 (orange) is the most spread out, covering the middle and lower-middle sections. Cluster 2 (green) appears mostly on the left side and lower portion of the chart. There is some overlap between the clusters in the central area, which is expected because PCA reduces many dimensions into just two, so some information is lost in the process.
+Business meaning
+The fact that four distinct regions are visible confirms that the K-Means model successfully found real differences between customer groups. These groupings are based on genuine patterns in the data and are not random. This gives the business a solid foundation for designing different strategies for each customer segment.
+Code
+# Reduce features to 2 dimensions using PCA for visualisation only
+pca = PCA(n_components=2, random_state=42)
+X_pca = pca.fit_transform(X_scaled)
+
+df_clustered["pca1"] = X_pca[:, 0]
+df_clustered["pca2"] = X_pca[:, 1]
+
+plt.figure(figsize=(8, 6))
+for cluster in sorted(df_clustered["cluster"].unique()):
+    subset = df_clustered[df_clustered["cluster"] == cluster]
+    plt.scatter(subset["pca1"], subset["pca2"],
+                label=f"Cluster {cluster}", alpha=0.6)
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.title("Customer Segmentation using PCA")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+
+3.2  Customer Segmentation by Tenure and Monthly Charges
+What this diagram shows
+This scatter plot maps every customer using two of the most important features in the dataset: tenure (how long the customer has been with the company, shown on the horizontal axis) and monthly charges (how much the customer pays each month, shown on the vertical axis). Each dot is a customer and the colour shows which cluster they belong to.
+
+ 
+Diagram 2: Customer Segmentation by Tenure and Monthly Charges — clusters separated mainly by spending level
+What we can see
+The most striking pattern in this chart is a clear horizontal separation between Cluster 2 (green) and the other three clusters. Almost all Cluster 2 customers are concentrated in the lower half of the chart, with monthly charges mostly below $50. The other three clusters — Cluster 0, Cluster 1, and Cluster 3 — all sit in the upper half, with monthly charges mostly above $60 and reaching up to $120.
+Across the tenure axis, all four clusters are spread fairly evenly from 0 to 72 months. This tells us that tenure alone does not separate the customer groups. It is the monthly spending level that makes Cluster 2 stand apart from the rest.
+Business meaning
+Cluster 2 is clearly the low-spend customer group. These customers pay significantly less per month, which may mean they are on cheaper plans or use fewer services. For the business, this group could be a target for upgrade campaigns or bundled service promotions. The three high-spend clusters are better differentiated from each other by other features such as contract type, which is why those details are explored in the heatmap.
+Code
+plt.figure(figsize=(8, 5))
+for cluster in sorted(df_clustered["cluster"].unique()):
+    subset = df_clustered[df_clustered["cluster"] == cluster]
+    plt.scatter(subset["tenure"], subset["monthlycharges"],
+                label=f"Cluster {cluster}", alpha=0.6)
+plt.xlabel("Tenure")
+plt.ylabel("Monthly Charges")
+plt.title("Customer Segmentation by Tenure and Monthly Charges")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+
+3.3  Cluster Feature Comparison — Heatmap
+What this diagram shows
+A heatmap uses colour to show the size of values in a grid. This heatmap shows the average tenure and average monthly charges for each of the four clusters side by side. Each cell shows the exact number, and the colour gives a quick visual cue: darker red means a higher value, and darker blue means a lower value.
+
+ 
+Diagram 3: Cluster Feature Comparison Heatmap — average tenure (months) and average monthly charges ($) per cluster
+What we can see
+Looking at the tenure column (left side of the heatmap), all four clusters have very similar values — ranging from 31.29 months for Cluster 1 up to 34.15 months for Cluster 3. The colours in this column are all similar shades of blue, confirming that tenure barely differs between clusters.
+The monthly charges column (right side) is much more interesting. Clusters 0, 1, and 3 all show deep red cells, with averages of $67.95, $67.93, and $65.46. Cluster 2 stands out with a light blue cell and an average of just $42.02 — nearly $26 less per month than the others.
+Business meaning
+This heatmap makes it instantly clear that monthly charges are the main differentiating feature between the clusters, while tenure is almost the same across all groups. Cluster 2 is the low-spend segment. The business can use this information to identify budget customers and design specific offers to either retain them or encourage them to move to higher-value plans.
+Code
+# Calculate average tenure and monthly charges for each cluster
+cluster_summary = df_clustered.groupby("cluster")[["tenure", "monthlycharges"]].mean()
+
+plt.figure(figsize=(6, 4))
+sns.heatmap(cluster_summary, annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Cluster Feature Comparison")
+plt.tight_layout()
+plt.show()
+
+
+3.4  Tenure Distribution by Cluster — Box Plot
+What this diagram shows
+A box plot is a simple way to show how spread out a set of values is. The box in the middle of the chart covers the range of the middle 50% of customers in that cluster. The line inside the box shows the median (the middle value). The lines extending outside the box, called whiskers, show the lowest and highest values. This chart shows one box for each cluster so we can compare them side by side.
+
+ 
+Diagram 4: Tenure Distribution by Cluster — comparing how long customers have been with the company across clusters
+What we can see
+All four clusters have almost identical box plots. The medians for all clusters sit between approximately 27 and 32 months. The boxes are all a similar height, meaning the spread of tenure is roughly the same in every cluster. The whiskers extend from near 0 months all the way up to about 71 months in all four clusters. Cluster 3 has a slightly higher box and median than the others, but the difference is very small.
+Business meaning
+This chart confirms that tenure — how long a customer has been with the company — does not meaningfully separate the four clusters. Customers with both short and long tenure exist in all four groups. This means the clustering model is grouping customers based on other features, not loyalty length. For the business, this is an important insight: churn risk is not simply a matter of how new a customer is.
+Code
+plt.figure(figsize=(8, 5))
+sns.boxplot(x="cluster", y="tenure", data=df_clustered)
+plt.xlabel("Cluster")
+plt.ylabel("Tenure")
+plt.title("Tenure Distribution by Cluster")
+plt.tight_layout()
+plt.show()
+
+
+3.5  Monthly Charges Distribution by Cluster — Box Plot
+What this diagram shows
+This box plot uses the same format as Diagram 4, but this time shows the distribution of monthly charges instead of tenure. It allows us to see not just the average spend in each cluster, but also how much variation exists within each group. A taller box means more variation; a shorter box means customers in that cluster pay more similar amounts.
+
+ 
+Diagram 5: Monthly Charges Distribution by Cluster — comparing monthly spending across clusters
+What we can see
+This chart tells a very different story from the tenure box plot. Three clusters — Cluster 0, Cluster 1, and Cluster 3 — all have tall boxes sitting between roughly $45 and $90, with medians around $75. These are the high-spend clusters.
+Cluster 2 is dramatically different. Its box is much smaller and sits much lower, with a median around $40 and the top of the box reaching only about $50. The whiskers for Cluster 2 are also much shorter, meaning there is very little variation in spending within this group — almost all Cluster 2 customers pay a similar, low amount.
+Business meaning
+This chart reinforces the finding from Diagrams 2 and 3: Cluster 2 is definitively the low-spend segment. The narrow box tells us these customers are very consistent in what they pay. The three high-spend clusters have more variation, with some customers paying as little as $20 and others paying over $110. The high-spend clusters represent the highest financial risk to the business if those customers churn, because losing them means losing significantly more revenue per customer.
+Code
+plt.figure(figsize=(8, 5))
+sns.boxplot(x="cluster", y="monthlycharges", data=df_clustered)
+plt.xlabel("Cluster")
+plt.ylabel("Monthly Charges")
+plt.title("Monthly Charges Distribution by Cluster")
+plt.tight_layout()
+plt.show()
+
+
+3.6  Churn Rate by Cluster — Bar Chart
+What this diagram shows
+This bar chart shows the average churn rate for each cluster. The churn column was not used when building the clusters — it was only examined afterwards to understand how the cluster segments relate to real churn behaviour. The vertical axis shows the churn rate as a value between 0 and 1 (for example, 0.29 means 29% of customers in that cluster have churned). The clusters are ordered from highest to lowest churn rate.
+
+ 
+Diagram 6: Churn Rate by Cluster — average churn rate per cluster, ordered from highest to lowest
+What we can see
+Cluster 1 has the highest churn rate at approximately 0.29 (29%). Cluster 0 is next at around 0.26 (26%), followed by Cluster 2 at 0.25 (25%), and finally Cluster 3 with the lowest churn rate at approximately 0.24 (24%). The differences between clusters are moderate — the gap between the highest and lowest is about 5 percentage points — but they are meaningful enough to guide business decisions.
+Business meaning
+Cluster 1 is the highest-risk group for churn. Since Cluster 1 customers also have high monthly charges (around $68 on average), losing these customers would represent a significant revenue loss for the business. This cluster should be the first priority for targeted retention campaigns.
+Cluster 3 has the lowest churn rate at 24%, making these customers the most loyal segment. The business can treat these customers as relatively stable and could look at what makes them happy as a benchmark for other segments.
+It is also worth noting that even though Cluster 2 customers pay the least, their churn rate (25%) is not much lower than the high-spend clusters. This means low-spend customers are not automatically more loyal — they churn at nearly the same rate, which could indicate dissatisfaction with the value they receive from the service.
+Code
+# Calculate average churn rate per cluster, sorted highest to lowest
+churn_rate = df_clustered.groupby("cluster")["churn"].mean()
+            .sort_values(ascending=False)
+
+plt.figure(figsize=(7, 4))
+churn_rate.plot(kind="bar")
+plt.xlabel("Cluster")
+plt.ylabel("Average Churn Rate")
+plt.title("Churn Rate by Cluster")
+plt.tight_layout()
+plt.show()
+
+4. Summary and Key Findings
+The six visualisations together provide a complete picture of the four customer segments identified by the K-Means clustering model. Below is a summary of each cluster and what it means for the business:
+
+•	Cluster 0 — High monthly charges (~$68 avg), average tenure of 32.52 months, churn rate of 26%. This is a high-value but moderately at-risk group.
+•	Cluster 1 — High monthly charges (~$68 avg), average tenure of 31.29 months, and the highest churn rate at 29%. This is the most urgent group for targeted retention efforts.
+•	Cluster 2 — Clearly the low-spend group with average monthly charges of just $42.02, average tenure of 31.74 months, and a churn rate of 25%. Despite paying less, these customers churn at a similar rate to higher-spending groups.
+•	Cluster 3 — High monthly charges (~$65 avg), average tenure of 34.15 months, and the lowest churn rate at 24%. This is the most loyal and stable segment.
+
+The main finding across all six visualisations is that monthly charges are the most visible differentiator between the clusters, while tenure is almost identical across all four groups. This tells us that how much a customer pays — not how long they have been with the company — is more strongly linked to which customer segment they fall into.
+Churn risk is present across all four segments, which means no group is completely safe. However, Cluster 1 is the clearest priority for the business due to its combination of high spend and high churn rate. Retaining Cluster 1 customers would have the greatest financial impact.
+These cluster labels will be passed forward into the next stage of the project as an additional feature to help the churn prediction model. By knowing which cluster a customer belongs to, the model gains valuable context about that customer's behaviour and risk profile.
+
+5. Tools and Libraries Used
+All visualisations in this section were produced using Python. The following libraries were used:
+
+•	pandas — used for loading, organising, filtering, and grouping the dataset into cluster-level summaries
+•	matplotlib — used for creating the scatter plots (Diagrams 1 and 2) and the bar chart (Diagram 6)
+•	seaborn — used for creating the heatmap (Diagram 3) and the two box plots (Diagrams 4 and 5) with clean, professional styling
+•	scikit-learn (sklearn) — used for the PCA transformation applied in Diagram 1 to reduce the dataset to two dimensions for visualisation
+
+The code was written and executed inside a Jupyter Notebook (.ipynb file), which displays the chart output directly below the code that generated it. This makes it straightforward for anyone reviewing the work to follow each step and reproduce the results.
+The seaborn whitegrid theme was applied to all charts, giving them a clean background with light grid lines that make values easier to read. Every chart includes clear axis labels and a title so the diagrams are self-explanatory without needing to read the surrounding text.

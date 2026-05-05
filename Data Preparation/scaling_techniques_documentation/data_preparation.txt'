@@ -1,0 +1,284 @@
+2.1 Data Preparation Deliverables
+
+Introduction
+
+The purpose of the data preparation stage was to transform the raw customer churn dataset into a clean, structured, and machine-readable format suitable for later analysis and modeling. Data preparation is essential because raw datasets are often not ready for direct use in clustering or machine learning. Even when a dataset appears complete, it still needs to be inspected, standardized, encoded, and formatted correctly so that later steps are reliable and reproducible.
+In this project, the raw dataset was loaded from `data/raw/Dataset_ATS_v2.csv` and preserved unchanged. This was done to ensure that the original data source remained intact for traceability and future reference. All preprocessing work was performed on copies of the dataset, and the resulting outputs were saved separately in the processed data folder.
+The main tasks completed in this stage were:
+•	inspection of the raw dataset
+•	preprocessing and cleaning
+•	conversion of categorical variables into numeric form
+•	splitting into training and testing datasets
+•	application of scaling techniques to selected features
+
+1. Initial Data Inspection
+Before applying any transformation, the raw dataset was explored to understand its structure and quality. This included checking:
+•	the number of rows and columns
+•	column names
+•	data types
+•	missing values
+•	duplicate rows
+•	unique values in categorical columns
+•	summary statistics for numerical columns
+The dataset contained 7043 rows and 10 columns. The original columns were:
+•	`gender`
+•	`SeniorCitizen`
+•	`Dependents`
+•	`tenure`
+•	`PhoneService`
+•	`MultipleLines`
+•	`InternetService`
+•	`Contract`
+•	`MonthlyCharges`
+•	`Churn`
+This inspection step was important because preprocessing decisions should be based on observed characteristics of the dataset rather than assumptions.
+
+Why this was used
+Initial inspection was used to understand the dataset’s current condition and decide what preparation steps were necessary.
+
+
+Why it was important
+Without this step, later cleaning or transformation could be inaccurate or unnecessary. For example, applying missing-value imputation without first checking whether missing values exist would be poor practice.
+
+2. Missing Value Check
+A missing-value check was conducted across all columns using pandas.
+
+Result
+No missing values were found in the dataset.
+
+Why this was used
+Missing values can cause errors or distortions in machine learning algorithms and clustering models. A missing-value check is therefore a standard part of preprocessing.
+
+Why this choice was important
+Even though no missing values were found, this step was still necessary because it confirmed that no imputation method was required. This prevented unnecessary or artificial modification of the dataset.
+
+Decision made
+Since no missing values were present, no imputation or deletion strategy was applied.
+
+3. Duplicate Row Check
+A duplicate-row check was also performed.
+
+Result
+The dataset contained 302 duplicate rows.
+
+Why this was used
+Duplicate rows can bias model learning and pattern detection, especially if they represent accidental repeated records rather than genuine repeated cases.
+
+Why the duplicates were not removed
+The dataset did not include a unique customer identifier such as a customer ID. Because of this, it could not be confirmed whether duplicate rows represented:
+•	accidental duplicate records, or
+•	different customers with the same recorded attributes
+Removing them automatically would therefore have been an unsupported assumption.
+
+Decision made
+The duplicates were documented but retained.
+
+Why this choice was important
+This was the safest and most defensible option. It preserved data integrity and avoided deleting potentially valid observations without evidence.
+
+4. Column Name Standardisation
+The column names were standardized by:
+•	removing extra spaces
+•	converting all text to lowercase
+•	replacing spaces with underscores
+•	removing special characters where necessary
+For example:
+•	`SeniorCitizen` became `seniorcitizen`
+•	`MonthlyCharges` became `monthlycharges`
+
+Why this was used
+Standardized column names make the dataset easier to work with in Python scripts and notebooks.
+
+Why this choice was important
+This improves readability, reduces coding errors, and ensures consistency across different files and team members’ work. It also makes the data pipeline easier to reproduce.
+
+5. Standardisation of Categorical Text Values
+All categorical text values were standardized by:
+•	removing unnecessary spaces
+•	converting values to lowercase
+For example:
+•	`Yes` became `yes`
+•	`No` became `no`
+•	`Male` became `male`
+•	`Female` became `female`
+
+Why this was used
+Text categories often appear consistent but may contain subtle differences in case or spacing. If these are not cleaned, the encoding stage can treat them as separate categories incorrectly.
+
+Why this choice was important
+This step ensured consistent category labels and prevented errors during encoding. It also improved the reliability of downstream analysis.
+
+6. Identification of Numeric and Categorical Features
+After cleaning the structure and text values, the variables were separated into numeric and categorical types.
+Numeric features identified
+•	`seniorcitizen`
+•	`tenure`
+•	`monthlycharges`
+Categorical features identified
+•	`gender`
+•	`dependents`
+•	`phoneservice`
+•	`multiplelines`
+•	`internetservice`
+•	`contract`
+•	`churn`
+
+Why this was used
+Different preprocessing methods are required for different variable types. Numeric variables may need scaling, while categorical variables must be encoded.
+
+Why this choice was important
+Correct feature identification is essential to choosing appropriate preprocessing techniques and avoiding incorrect transformations.
+
+7. Preprocessed Dataset
+The next step was to prepare a preprocessed dataset that addressed categorical encoding and target preparation.
+Target variable conversion
+The target variable `churn` originally contained text values:
+•	`yes`
+•	`no`
+It was converted into numeric form:
+•	`no` = 0
+•	`yes` = 1
+
+Why this was used
+Machine learning models require the target variable to be numeric rather than text.
+
+Why this choice was important
+This binary conversion preserved the meaning of the target while making it usable in later modeling and evaluation.
+
+8. Encoding of Categorical Variables
+The categorical input features were converted into numeric form using one-hot encoding with:
+`pd.get_dummies(..., drop_first=True)`
+The encoded categorical variables were:
+•	`gender`
+•	`dependents`
+•	`phoneservice`
+•	`multiplelines`
+•	`internetservice`
+•	`contract`
+
+Why one-hot encoding was used
+One-hot encoding was chosen because the categorical variables in this dataset are nominal or binary. This method converts each category into a separate numeric column without imposing an artificial order.
+
+Why this choice was important
+Alternative approaches such as label encoding could incorrectly suggest a numeric ranking between categories, which would be misleading. One-hot encoding is more appropriate because it preserves category meaning without creating false numerical relationships.
+
+Why `drop_first=True` was used
+This option removes one reference category from each encoded feature to avoid unnecessary redundancy in the dataset. It also keeps the dataset more compact.
+
+9. Boolean-to-Integer Conversion
+After one-hot encoding, some resulting dummy columns were stored as boolean values (`True` and `False`). These were converted into integers (`1` and `0`).
+
+Why this was used
+Although boolean values can technically be used in some contexts, converting them to integers creates a fully numeric dataset that is easier to store, inspect, and reuse.
+
+Why this choice was important
+This step improved consistency across all columns and made the dataset more suitable for modeling and export.
+
+10. Output of the Preprocessed Dataset
+The final preprocessed dataset was saved as:
+`data/processed/churn_processed.csv`
+This dataset contained:
+•	all cleaned column names
+•	standardized text values
+•	categorical variables encoded into numeric format
+•	the target variable converted into 0 and 1
+
+Why this was used
+Saving the preprocessed dataset creates a reusable output for the next project steps, including train-test splitting, scaling, clustering, and predictive modeling.
+
+Why this choice was important
+It separates the original raw data from the transformed working dataset and improves reproducibility.
+
+11. Training and Testing Sets
+After preprocessing, the dataset was split into training and testing sets.
+
+Method used
+An 80:20 split was applied using `train_test_split()` from scikit-learn, with stratification based on the `churn` target variable.
+Result
+•	training set size: 5634 rows
+•	testing set size: 1409 rows
+
+Why this was used
+The purpose of train-test splitting is to allow future models to be trained on one portion of the data and evaluated on another unseen portion. This helps measure whether a model generalizes well instead of simply memorizing the data.
+
+Why stratification was used
+The churn variable is imbalanced, with more non-churn customers than churn customers. Stratified sampling preserves this class balance in both the training and testing sets.
+
+Why this choice was important
+Without stratification, the class distribution in train and test could differ too much, making later evaluation unreliable.
+
+Output files created
+•	`data/processed/churn_train.csv`
+•	`data/processed/churn_test.csv`
+
+12. Scaling Techniques
+After splitting, scaling was applied to the continuous numeric features.
+Scaling technique used
+`StandardScaler` from scikit-learn
+Features scaled
+•	`tenure`
+•	`monthlycharges`
+Features not scaled
+•	binary variables such as:
+  - `gender_male`
+  - `dependents_yes`
+  - `phoneservice_yes`
+  - `multiplelines_yes`
+  - `internetservice_fiber optic`
+  - `contract_one year`
+  - `contract_two year`
+•	`seniorcitizen`, because it is also binary
+
+Why StandardScaler was used
+`StandardScaler` transforms the selected features so that they have:
+•	mean close to 0
+•	standard deviation close to 1
+
+Why this was used
+Scaling is important because some algorithms, especially clustering methods and neural networks, are sensitive to differences in feature magnitude. Without scaling, variables with larger numeric ranges can dominate the model.
+
+Why only selected features were scaled
+`tenure` and `monthlycharges` are continuous features with wider ranges, while the other encoded variables are binary 0/1 variables. Scaling only the continuous features is a practical and interpretable approach.
+
+Why this choice was important
+This prevents larger-scale features from overpowering other inputs while preserving the meaning of binary variables.
+
+Why the scaler was fitted on the training set only
+The scaler was fitted only on the training data and then applied to the test data.
+This was done to avoid data leakage, where information from the test set unintentionally influences the training process.
+
+Why this choice was important
+Avoiding data leakage is essential for valid future model evaluation.
+Output files created
+•	`data/processed/churn_train_scaled.csv`
+•	`data/processed/churn_test_scaled.csv`
+
+13. Summary of Data Preparation Deliverables
+The completed data preparation deliverables include:
+Preprocessed dataset
+•	`churn_processed.csv`
+Training and testing sets
+•	`churn_train.csv`
+•	`churn_test.csv`
+Scaled training and testing sets
+•	`churn_train_scaled.csv`
+•	`churn_test_scaled.csv`
+
+What these deliverables achieve
+These files provide:
+•	a cleaned and encoded dataset
+•	separate datasets for future model training and testing
+•	scaled versions ready for clustering and machine learning
+
+14. Why These Choices Were Appropriate
+The preprocessing choices made in this project were appropriate because they were based on the actual characteristics of the dataset.
+•	Missing-value handling was not applied because no missing values were present.
+•	Duplicate rows were retained because there was no customer ID to justify automatic removal.
+•	One-hot encoding was used because the dataset contained nominal categorical variables.
+•	Train-test split was stratified because the churn classes were imbalanced.
+•	`StandardScaler` was applied to continuous variables because those features had larger numeric ranges and would likely affect clustering and later modeling if left unscaled.
+Together, these decisions produced a dataset that is more reliable, more consistent, and more suitable for further analysis.
+
+15. Conclusion
+The data preparation stage successfully converted the raw churn dataset into a structured and machine-readable format suitable for the next project steps. The dataset was explored, cleaned, standardized, encoded, split into training and testing sets, and selectively scaled using an appropriate technique.
+These deliverables now provide a strong foundation for clustering analysis and later predictive modeling. The choices made during preprocessing were not arbitrary; each one was applied because it matched the nature of the data and improved the quality and usability of the final outputs.
